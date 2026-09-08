@@ -75,8 +75,8 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    if (root / "结果").is_dir():
-        ledger = root / "内部记录" / "运行记录.csv"
+    if (root / "registries" / "run_ledger.csv").is_file():
+        ledger = root / "registries" / "run_ledger.csv"
         runs = root / "结果" / "运行记录"
     elif (root / "4_结果").is_dir():
         ledger = root / "registries" / "run_ledger.csv"
@@ -146,4 +146,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

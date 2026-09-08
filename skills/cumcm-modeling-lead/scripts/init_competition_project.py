@@ -21,6 +21,7 @@ LIGHT_DIRECTORIES = (
 STRICT_DIRECTORIES = (
     "结果/运行记录",
     "内部记录",
+    "registries",
 )
 
 SHARED_NOTE = """# 全队建模记录
@@ -70,24 +71,29 @@ AI_NOTE = """# AI使用记录
 """
 
 REGISTRIES = {
-    "运行记录.csv": [
+    "run_ledger.csv": [
         "run_id", "timestamp", "question", "purpose", "status", "command",
         "inputs", "code", "parameters", "seed", "outputs", "return_code",
         "stdout", "stderr", "validation_status",
     ],
-    "结果记录.csv": [
-        "result_id", "question", "name", "value", "unit", "scenario",
-        "run_id", "source_file", "validation_method", "validation_status",
-        "boundary", "status",
+    "result_registry.csv": [
+        "result_id", "question", "name", "value", "unit", "denominator",
+        "scenario", "run_id", "source_file", "validation_method",
+        "validation_status", "boundary", "status",
     ],
-    "论文结论记录.csv": [
+    "claim_ledger.csv": [
         "claim_id", "question", "claim", "result_ids", "figure_ids",
-        "formula_or_source", "unit", "scenario", "boundary",
+        "formula_or_source", "unit", "scenario", "boundary", "paper_location",
         "validation_status", "status",
     ],
-    "图表记录.csv": [
+    "figure_evidence.csv": [
         "figure_id", "claim_id", "file", "source_data", "source_script",
-        "unit", "scenario", "caption", "validation_status", "status",
+        "unit", "scenario", "caption", "post_figure_conclusion", "risk_note",
+        "render_check_status", "human_visual_check", "validation_status", "status",
+    ],
+    "issue_ledger.csv": [
+        "issue_id", "severity", "stage", "artifact", "location", "issue",
+        "impact", "minimum_fix", "owner", "status",
     ],
 }
 
@@ -128,7 +134,7 @@ def main() -> int:
     if args.strict:
         for relative in STRICT_DIRECTORIES:
             (root / relative).mkdir(parents=True, exist_ok=True)
-        record_dir = root / "内部记录"
+        record_dir = root / "registries"
         for name, header in REGISTRIES.items():
             write_csv_if_missing(record_dir / name, header)
 
@@ -157,4 +163,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

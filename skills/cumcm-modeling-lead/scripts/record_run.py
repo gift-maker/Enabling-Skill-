@@ -13,6 +13,11 @@ from pathlib import Path
 
 
 VALID_STATUS = {"exploratory", "baseline", "candidate", "final", "validation"}
+RUN_HEADER = [
+    "run_id", "timestamp", "question", "purpose", "status", "command",
+    "inputs", "code", "parameters", "seed", "outputs", "return_code",
+    "stdout", "stderr", "validation_status",
+]
 
 
 def sha256(path: Path) -> str:
@@ -43,6 +48,10 @@ def next_run_id(run_dir: Path) -> str:
 
 
 def append_ledger(ledger: Path, row: dict[str, object]) -> None:
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    if not ledger.exists():
+        with ledger.open("w", encoding="utf-8-sig", newline="") as stream:
+            csv.writer(stream).writerow(RUN_HEADER)
     with ledger.open("r", encoding="utf-8-sig", newline="") as stream:
         header = next(csv.reader(stream))
     with ledger.open("a", encoding="utf-8-sig", newline="") as stream:
@@ -66,10 +75,16 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    ledger = root / "registries" / "run_ledger.csv"
-    runs = root / "4_结果" / "runs"
-    if not ledger.is_file() or not runs.is_dir():
-        parser.error("项目未初始化，请先运行 init_competition_project.py")
+    if (root / "结果").is_dir():
+        ledger = root / "内部记录" / "运行记录.csv"
+        runs = root / "结果" / "运行记录"
+    elif (root / "4_结果").is_dir():
+        ledger = root / "registries" / "run_ledger.csv"
+        runs = root / "4_结果" / "runs"
+    else:
+        ledger = root / "内部记录" / "运行记录.csv"
+        runs = root / "结果" / "运行记录"
+    runs.mkdir(parents=True, exist_ok=True)
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
     if not command:
         parser.error("缺少要执行的命令；在参数后使用 -- 命令")
@@ -131,3 +146,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

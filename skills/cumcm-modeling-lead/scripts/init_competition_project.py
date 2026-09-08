@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""建立 CUMCM 一体化项目骨架和空白证据登记表。"""
+"""建立默认轻量、可选严格记录的国赛项目。"""
 
 from __future__ import annotations
 
@@ -10,50 +10,84 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-DIRECTORIES = (
-    "0_题面与附件",
-    "1_数据/raw",
-    "1_数据/processed",
-    "2_建模",
-    "3_代码",
-    "4_结果/runs",
-    "5_图表",
-    "6_论文",
-    "7_提交",
-    "registries",
+LIGHT_DIRECTORIES = (
+    "题面与附件",
+    "数据",
+    "建模与代码",
+    "结果",
+    "论文",
 )
 
-TEXT_FILES = {
-    "建模总控.md": "# 建模总控\n\n## 全题目标\n\n## 子问依赖\n\n## 系统边界\n\n## 关键风险\n\n## 时间预算\n",
-    "模型合同.md": "# 模型合同\n\n状态：待建模手确认\n\n## 问题一\n\n### 输入与输出\n\n### 假设、变量与参数\n\n### 方程、目标与约束\n\n### 候选、基线与主方案\n\n### 验证与失败条件\n",
-    "术语与符号表.md": "# 术语与符号表\n\n| 符号 | 含义 | 类型 | 单位 | 范围 | 来源 |\n|---|---|---|---|---|---|\n",
-    "ai_usage_log.md": "# AI 使用记录\n\n| 时间 | 阶段 | 用途 | 主要输入 | 采纳/修改/弃用 | 人工核验 | 对应文件 |\n|---|---|---|---|---|---|---|\n",
-}
+STRICT_DIRECTORIES = (
+    "结果/运行记录",
+    "内部记录",
+)
+
+SHARED_NOTE = """# 全队建模记录
+
+## 现在做到
+
+- 现在做到：
+- 这一步要解决：
+- 为什么现在做：
+- 我们已有：
+- 这一步产出：
+- 怎样算完成：
+- 下一步：
+
+## 全题依赖
+
+## 题目事实、数据发现与未知项
+
+## 逐问建模
+
+### 问题一
+
+- 现实问题：
+- 输入：
+- 输出：
+- 思路：
+- 假设与约束：
+- 验证：
+- 结果与边界：
+
+## 关键决定
+
+| 时间 | 决定 | 为什么 | 谁已理解 | 是否需要复查 |
+|---|---|---|---|---|
+
+## 全队复述检查
+
+- 思路负责人：
+- 计算负责人：
+- 论文负责人：
+"""
+
+AI_NOTE = """# AI使用记录
+
+| 时间 | 用途 | AI给出的内容 | 全队怎样修改或取舍 | 怎样人工核验 | 对应文件 |
+|---|---|---|---|---|---|
+"""
 
 REGISTRIES = {
-    "run_ledger.csv": [
+    "运行记录.csv": [
         "run_id", "timestamp", "question", "purpose", "status", "command",
         "inputs", "code", "parameters", "seed", "outputs", "return_code",
         "stdout", "stderr", "validation_status",
     ],
-    "result_registry.csv": [
-        "result_id", "question", "name", "value", "unit", "denominator",
-        "scenario", "run_id", "source_file", "validation_method",
-        "validation_status", "boundary", "status",
+    "结果记录.csv": [
+        "result_id", "question", "name", "value", "unit", "scenario",
+        "run_id", "source_file", "validation_method", "validation_status",
+        "boundary", "status",
     ],
-    "claim_ledger.csv": [
+    "论文结论记录.csv": [
         "claim_id", "question", "claim", "result_ids", "figure_ids",
-        "formula_or_source", "unit", "scenario", "boundary", "paper_location",
+        "formula_or_source", "unit", "scenario", "boundary",
         "validation_status", "status",
     ],
-    "figure_evidence.csv": [
+    "图表记录.csv": [
         "figure_id", "claim_id", "file", "source_data", "source_script",
-        "unit", "scenario", "caption", "post_figure_conclusion", "risk_note",
-        "render_check_status", "human_visual_check", "validation_status", "status",
-    ],
-    "issue_ledger.csv": [
-        "issue_id", "severity", "stage", "artifact", "location", "issue",
-        "impact", "minimum_fix", "owner", "status",
+        "unit", "scenario", "caption", "validation_status", "status",
     ],
 }
 
@@ -73,63 +107,54 @@ def write_csv_if_missing(path: Path, header: list[str]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("project", type=Path, help="题目项目目录")
-    parser.add_argument("--competition", default="CUMCM")
-    parser.add_argument("--problem", default="")
+    parser.add_argument("--competition", default="CUMCM", help="竞赛名称")
+    parser.add_argument("--problem", default="", help="题号")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="建立正式运行、结果、图表和论文结论的详细记录",
+    )
     args = parser.parse_args()
 
     root = args.project.resolve()
     root.mkdir(parents=True, exist_ok=True)
-    for relative in DIRECTORIES:
+
+    for relative in LIGHT_DIRECTORIES:
         (root / relative).mkdir(parents=True, exist_ok=True)
-    for relative, content in TEXT_FILES.items():
-        write_if_missing(root / relative, content)
-    for name, header in REGISTRIES.items():
-        write_csv_if_missing(root / "registries" / name, header)
 
-    data_contract_path = root / "1_数据" / "data_contract.json"
-    if not data_contract_path.exists():
-        data_contract = {
-            "schema_version": "1.0",
-            "status": "draft",
-            "source_files": [],
-            "tables": [],
-            "checks": {
-                "columns": [],
-                "types": [],
-                "units": [],
-                "missing": [],
-                "ranges": [],
-                "uniqueness": [],
-                "time_order": [],
-                "group_or_spatial_structure": [],
-                "leakage_risk": [],
-            },
-            "unknowns": [],
-            "owner": "编程手",
-            "modeling_lead_status": "pending",
-        }
-        data_contract_path.write_text(
-            json.dumps(data_contract, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+    write_if_missing(root / "全队建模记录.md", SHARED_NOTE)
+    write_if_missing(root / "AI使用记录.md", AI_NOTE)
 
-    state_path = root / "project_state.json"
-    if not state_path.exists():
-        state = {
-            "schema_version": "1.0",
-            "competition": args.competition,
-            "problem": args.problem,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "current_stage": "S0",
-            "modeling_gate": "pending",
-            "evidence_gate": "pending",
-            "submission_gate": "pending",
-            "decisions": [],
-        }
-        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if args.strict:
+        for relative in STRICT_DIRECTORIES:
+            (root / relative).mkdir(parents=True, exist_ok=True)
+        record_dir = root / "内部记录"
+        for name, header in REGISTRIES.items():
+            write_csv_if_missing(record_dir / name, header)
 
-    print(root)
+        state_path = record_dir / "项目状态.json"
+        if not state_path.exists():
+            state = {
+                "schema_version": "2.0",
+                "competition": args.competition,
+                "problem": args.problem,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "current_step": "读题",
+                "model_confirmed": False,
+                "results_frozen": False,
+                "submission_checked": False,
+                "decisions": [],
+            }
+            state_path.write_text(
+                json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+    mode = "严格记录模式" if args.strict else "默认轻量模式"
+    print(f"{root}\n已建立：{mode}")
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

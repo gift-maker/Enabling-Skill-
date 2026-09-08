@@ -1,0 +1,4 @@
+interface:
+  display_name: "国赛全队建模总控"
+  short_description: "统筹建模、编程、论文、独立验证和全链证据"
+  default_prompt: "使用 $cumcm-modeling-lead 处理这道国赛题。先完成题包审计、全题依赖图和逐问模型合同，区分事实、假设、设计选择与未知项；通过 M0 后组织基线、主模型、真实运行、独立验证、科学绘图和论文证据冻结。所有正式结论必须沿 Claim→Result/Figure→Run 追溯，终稿执行一致性与 fresh-eyes 审查。"

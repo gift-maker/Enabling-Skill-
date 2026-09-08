@@ -1,0 +1,6 @@
+# 可选验证工具；按题目需要安装，不要求所有比赛项目一次装齐。
+sympy
+SALib
+pandera[pandas]
+pint
+uncertainties

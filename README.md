@@ -6,6 +6,9 @@
 
 ![数学建模全流程](docs/workflow.png)
 
+- [新版 Skill 整体架构图（Mermaid）](docs/国赛建模Skill整体架构图.md)
+- [新版中文使用说明书](docs/国赛建模Skill中文使用说明书.md)
+
 ## 核心目标
 
 - 完整读取题面和附件，明确每一问及其依赖关系；

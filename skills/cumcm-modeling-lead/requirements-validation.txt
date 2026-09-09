@@ -4,4 +4,4 @@ SALib
 pandera[pandas]
 pint
 uncertainties
-
+PyMuPDF>=1.24,<2

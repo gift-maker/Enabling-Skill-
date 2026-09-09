@@ -27,3 +27,4 @@ SOFTWARE.
 - `tools/drawio/`：drawio-skill v2.1.0（MIT，Agents365-ai）
 - `references/绘图参考/`：部分内容源自 scipilot-figure-skill（MIT，Haojae）
 - `tools/{docx,pdf,xlsx}/`：内含各自 LICENSE.txt（MIT）
+- `tools/figure/nature_audit/`：源自 Yuan1z0825/nature-skills（Apache-2.0），许可证见该目录

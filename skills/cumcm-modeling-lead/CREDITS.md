@@ -17,6 +17,7 @@
 | --- | --- | --- |
 | drawio-skill v2.1.0（Agents365-ai，<https://github.com/Agents365-ai/drawio-skill>） | MIT | `tools/drawio/` |
 | scipilot-figure-skill（Haojae） | MIT | `references/绘图参考/` |
+| nature-skills / nature-figure（Yuan1z0825） | Apache-2.0 | `tools/figure/nature_audit/` 的终稿源文件、子图对齐、PDF 字体与碰撞审计脚本 |
 | cumcm-abstract-writing-skill（<https://github.com/jjh666888/cumcm-abstract-writing-skill>） | 开源 | `references/摘要写作/`（方法论部分） |
 | mathmodel-figure-templates | 内置自包含 | `assets/figure-templates/` |
 | tools/{docx,pdf,xlsx} 基础工具 | MIT | `tools/`（各自含 LICENSE.txt） |
